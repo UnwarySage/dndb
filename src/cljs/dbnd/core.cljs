@@ -29,10 +29,9 @@
 (defn home-page []
   (fn []
     [:span.main
-     [:h1 "Welcome to DnDB"]
-     [:ul
-      [:li [:a {:href (path-for :items)} "Items of dbnd"]]
-      [:li [:a {:href "/broken/link"} "Broken link"]]]]))
+     [:div.container
+      [:h1 "Welcome to DBnD"]
+      [:p.flow-text "DBnD is the premiere fictional services exchange. Here, bold heroes can find wise mentors, accept perilous quests, and recieve their just rewards."]]]))
 
 
 
