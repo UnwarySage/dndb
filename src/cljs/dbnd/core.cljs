@@ -56,7 +56,23 @@
 
 (defn about-page []
   (fn [] [:span.main
-          [:h1 "About dbnd"]]))
+          [:div.container
+            [:h1 "About dbnd"]
+            [:p.flow-text "DBnD is the premiere fictional services exchange. Here, bold heroes can find wise mentors, accept perilous quests, and recieve their just rewards."]
+          [:div.row 
+          [:div.col.s4
+            [:h3.center-align "Heroes"]
+            [:p.flow-text
+             "Browse the realms heroes, see their names written down in glory, and their availibility in simple terms"]]
+           [:div.col.s4
+            [:h3.center-align "Patrons"]
+            [:p.flow-text 
+             "The high and mighty, the lowly and destitute, all united by that little icon over their heads"]]
+           [:div.col.s4
+            [:h3.center-align "Quests"]
+            [:p.flow-text "You never forget the rats in the basement, even as you secure the final McGuffin" ]]]]]))
+
+
 (defn navbar []
   (fn [] [:nav
           [:div.nav-wrapper
