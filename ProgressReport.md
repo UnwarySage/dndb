@@ -14,7 +14,7 @@ We will be using the following features at a minimum.
 * Indexes, as both heroes, patrons, and quests all have primary keys
 * Normal Forms, normalized through the first three forms.
 
-What we do not have is Dynamic Collumn. Likely these could be used to place tags on quests.
+What we do not have is Dynamic Collumns. Likely these could be used to place tags on quests.
 
 ## Code Layout
 On the server, we are using a standard `Jetty` webserver, with `ring` middleware and `reitit` routing.
