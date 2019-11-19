@@ -4,7 +4,8 @@
    [reagent.session :as session]
    [reitit.frontend :as reitit]
    [clerk.core :as clerk]
-   [accountant.core :as accountant]))
+   [accountant.core :as accountant]
+   [dbnd.components.hero :as hero]))
 
 ;; -------------------------
 ;; Routes
@@ -90,28 +91,7 @@
             [:li 
              [:a {:href (path-for :about)} "About"]]]]]))
 
-(defn heroes-page []
-  (fn []
-    [:div.container
-     [:a {:href (path-for :hero {:hero-id "Songbird"})} "Songbird"]])) 
-     
 
-       
-          
-(defn hero-page [] 
-  (fn []
-    (let [routing-data (session/get :route)
-          hero (get-in routing-data [:route-params :hero-id])
-          hero-data {:hero-name "Songbird" 
-                     :hero-race "Kenku" 
-                     :hero-class "Rogue" 
-                     :hero-bio "Angst. All the angst. And then some."}]   
-      [:container
-       [:div.card
-        [:div.card-content
-         [:span.card-title (:hero-name hero-data)]
-         [:p (str (:hero-race hero-data) " " (:hero-class hero-data))]
-         [:p.flow-text (:hero-bio hero-data)]]]])))
 
 ;; -------------------------
 ;; Translate routes -> page components
@@ -122,8 +102,8 @@
     :about #'about-page
     :items #'items-page
     :item #'item-page
-    :hero #'hero-page
-    :heroes #'heroes-page))
+    :hero #'hero/hero-page
+    :heroes #'hero/heroes-page))
 
 
 ;; -------------------------
