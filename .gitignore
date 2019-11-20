@@ -1,0 +1,8 @@
+./target
+./out
+.lein*
+.lein-repl-history
+.nrepl-port
+.nrepl-history
+.figwheel_server.log
+
