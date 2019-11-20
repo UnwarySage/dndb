@@ -40,26 +40,24 @@
 
 (defn items-page []
   (fn []
-    [:span.main
+    [:div.container
      [:h1 "The items of dbnd"]
-     [:ul (map (fn [item-id]
-                 [:li {:name (str "item-" item-id) :key (str "item-" item-id)}
-                  [:a {:href (path-for :item {:item-id item-id})} "Item: " item-id]])
-               (range 1 60))]]))
+     [:ul.collection (map (fn [item-id]
+                 [:a.collection-item {:href (path-for :item {:item-id item-id}) :key (str "item-" item-id)}  "Item: " item-id])
+               (range 1 6))]]))
 
 
 (defn item-page []
   (fn []
     (let [routing-data (session/get :route)
           item (get-in routing-data [:route-params :item-id])]
-      [:span.main
+      [:div.container
        [:h1 (str "Item " item " of dbnd")]
        [:p [:a {:href (path-for :items)} "Back to the list of items"]]])))
 
 
 (defn about-page []
-  (fn [] [:span.main
-          [:div.container
+  (fn [] [:div.container
             [:h1 "About dbnd"]
             [:p.flow-text "DBnD is the premiere fictional services exchange. Here, bold heroes can find wise mentors, accept perilous quests, and recieve their just rewards."]
            [:div.row 
@@ -73,7 +71,7 @@
               "The high and mighty, the lowly and destitute, all united by that little icon over their heads"]]
             [:div.col.s4
              [:h3.center-align "Quests"]
-             [:p.flow-text "You never forget the rats in the basement, even as you secure the final McGuffin"]]]]]))
+             [:p.flow-text "You never forget the rats in the basement, even as you secure the final McGuffin"]]]]))
 
 
 (defn navbar []
@@ -93,10 +91,11 @@
 (defn heroes-page []
   (fn []
     [:div.container
-     [:a {:href (path-for :hero {:hero-id "Songbird"})} "Songbird"]])) 
-     
-
-       
+     [:h1 "Heroes"]
+     [:ul.collection (map (fn [hero-id]
+      [:a.collection-item {:href (path-for :hero {:hero-id hero-id})} "Hero Id: " hero-id])
+      (range 1 6))]])) 
+      
           
 (defn hero-page [] 
   (fn []
@@ -106,10 +105,10 @@
                      :hero-race "Kenku" 
                      :hero-class "Rogue" 
                      :hero-bio "Angst. All the angst. And then some."}]   
-      [:container
+      [:div.container
        [:div.card
         [:div.card-content
-         [:span.card-title (:hero-name hero-data)]
+         [:span.card-title hero (:hero-name hero-data)]
          [:p (str (:hero-race hero-data) " " (:hero-class hero-data))]
          [:p.flow-text (:hero-bio hero-data)]]]])))
 
