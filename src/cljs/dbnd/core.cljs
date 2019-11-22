@@ -18,7 +18,17 @@
     ["/heroes"
      ["" :heroes]
      ["/:hero-id" :hero]]
+    ["/patrons"
+      ["" :patrons]
+      ["/:patron-id" :patron]]
+    ["/quests"
+     ["" :quests]
+     ["/:quest-id":quest]]
+    ["/offers"
+     ["" :offers]
+     ["/:offer-id" :offer]]
     ["/about" :about]]))
+   
 
 (defn path-for [route & [params]]
   (if params
@@ -43,8 +53,8 @@
     [:div.container
      [:h1 "The items of dbnd"]
      [:ul.collection (map (fn [item-id]
-                 [:a.collection-item {:href (path-for :item {:item-id item-id}) :key (str "item-" item-id)}  "Item: " item-id])
-               (range 1 6))]]))
+                           [:a.collection-item {:href (path-for :item {:item-id item-id}) :key (str "item-" item-id)}  "Item: " item-id])
+                      (range 1 6))]]))
 
 
 (defn item-page []
@@ -78,13 +88,19 @@
   (fn [] [:nav
           [:div.nav-wrapper
            [:a]
-           [:ul#nav-mobile.left.hide-on-med-and-down
+           [:ul#nav-mobile.left
             [:li
              [:a {:href (path-for :index)}"Home"]] 
             [:li
              [:a {:href (path-for :items)}"Items"]]
             [:li
-             [:a {:href (path-for :heroes)}"Heroes"]]
+             [:a {:href (path-for :heroes)} "Heroes"]]
+            [:li
+             [:a {:href (path-for :offers)} "Offers"]]
+            [:li
+             [:a {:href (path-for :patrons)} "Patrons"]]
+            [:li
+             [:a {:href (path-for :quests)} "Quests"]]
             [:li 
              [:a {:href (path-for :about)} "About"]]]]]))
 
@@ -93,8 +109,8 @@
     [:div.container
      [:h1 "Heroes"]
      [:ul.collection (map (fn [hero-id]
-      [:a.collection-item {:href (path-for :hero {:hero-id hero-id})} "Hero Id: " hero-id])
-      (range 1 6))]])) 
+                           [:a.collection-item {:href (path-for :hero {:hero-id hero-id})} "Hero Id: " hero-id])
+                      (range 1 6))]])) 
       
           
 (defn hero-page [] 
@@ -104,14 +120,71 @@
           hero-data {:hero-name "Songbird" 
                      :hero-race "Kenku" 
                      :hero-class "Rogue" 
-                     :hero-bio "Angst. All the angst. And then some."}]   
+                     :hero-bio "Angst. All the angst.  then some."}]   
       [:div.container
        [:div.card
         [:div.card-content
-         [:span.card-title hero (:hero-name hero-data)]
+         [:span.card-title (:hero-name hero-data)]
          [:p (str (:hero-race hero-data) " " (:hero-class hero-data))]
          [:p.flow-text (:hero-bio hero-data)]]]])))
 
+(defn patrons-page []
+  (fn []
+    (let [patrons-list [{:patron-name "Umulthud" :patron-id 1}
+                        {:patron-name "Prince Lisfael" :patron-id 2}]]
+      [:div.container
+       [:h1 "Patrons"]
+       [:ul.collection 
+        (map (fn [patron-map]
+               [:a.collection-item 
+                {:href (path-for :patron {:patron-id patron-map})} (:patron-name patron-map)])
+             patrons-list)]])))
+                          
+
+(defn patron-page[]
+  (fn []
+    (let [routing-data (session/get :route)
+          patron (get-in routing-data [:route-params :patron-id])
+          patron-data {:patron-name "Umulthud"
+                       :patron-location "Ramann"}]               
+        [:div.container
+         [:div.card
+          [:div.card-content
+           [:span.card-title (:patron-name patron-data)]
+           [:p (str (:patron-name patron-data)" "(:patron-location patron-data))]
+           [:p.flow-text (:patron-bio patron-data)]]]])))
+  
+
+(defn quests-page []
+  (fn[]
+    (let [quests-list [{:quest-name "Extermination" :quest-id 1}
+                       {:quest-name "Missing Person" :quest-id 2}]]
+      [:div.container
+       [:h1 "Quests"]
+       [:ul.collection
+        (map (fn [quest-map]
+               [:a.collection-item
+                {:href (path-for :quest {:quest-id quest-map})} (:quest-name quest-map)]) quests-list)]]))) 
+
+
+(defn quest-page []
+  (fn []
+    (let [routing-data (session/get :route)
+          quest (get-in routing-data [:route-params :quest-id])
+          quest-data {:quest-name "Extermination"
+                      :quest-location "Ramann"
+                      :quest-reward "200GP"
+                      :quest-notes "This is for Giant rats in the forest."}]
+      [:div.container
+       [:div.card
+        [:div.card-content]
+        [:span.card-title (:quest-name quest-data)]
+        [:p (str (:quest-name quest-data)" "(:quest-location quest-data)" "(:quest-reward quest-data))]
+        [:p.flow-text (:quest-notes quest-data)]]])))
+
+(defn offers-page [])
+
+(defn offer-page [])
 ;; -------------------------
 ;; Translate routes -> page components
 
@@ -122,11 +195,16 @@
     :items #'items-page
     :item #'item-page
     :hero #'hero-page
-    :heroes #'heroes-page))
-
+    :heroes #'heroes-page
+    :offer #'offer-page
+    :offers #'offers-page
+    :patron #'patron-page
+    :patrons #'patrons-page
+    :quest #'quest-page
+    :quests #'quests-page))
 
 ;; -------------------------
-;; Page mounting component
+;; Page mounting nent
 
 (defn current-page []
   (fn []
