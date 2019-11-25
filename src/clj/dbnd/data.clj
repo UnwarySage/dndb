@@ -1,10 +1,16 @@
 (ns dbnd.data
-  (:require [next.jdbc :as jdbc]))
+  (:require [next.jdbc :as jdbc]
+            [clojure.edn :as edn]
+            ))
+(def credentials (edn/read-string (slurp "credentials.edn")))
 
-(def db {:dbtype "mysql" 
-         :dbname "DBnD"
-         :user ""
-         :password ""
-         :host "ids"})
+(def db
+  (merge
+    {:dbtype "mysql" 
+     :dbname "DBnD"
+     :user "example"
+     :password "abc123notapassword"
+      :host "ids"}
+    credentials))
 
 (def ds (jdbc/get-datasource db))
