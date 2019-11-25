@@ -15,3 +15,11 @@
     credentials))
 
 (def ds (jdbc/get-datasource db))
+
+(defn get-hero-names []
+  (into #{}
+        (map 
+          #(hash-map 
+             :hero-name (:Heroes/Hero_Name %) 
+             :hero-id (:Heroes/Hero_ID %))) 
+        (jdbc/plan ds ["select * from Heroes"])))
