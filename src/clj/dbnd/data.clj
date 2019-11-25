@@ -9,8 +9,9 @@
     {:dbtype "mysql" 
      :dbname "DBnD"
      :user "example"
-     :password "abc123notapassword"
-      :host "ids"}
+     :password "abc123notapassword"     
+     :host "ids"
+     :serverTimezone "America/Chicago"}
     credentials))
 
 (def ds (jdbc/get-datasource db))
