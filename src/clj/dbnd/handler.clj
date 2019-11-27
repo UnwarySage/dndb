@@ -51,7 +51,13 @@
   [_request]
   (standard-edn-response
     (data/get-hero-names)))    
-  
+ 
+(defn api-hero-handler
+  [{:keys [path-params] :as request}]
+  (println path-params)
+  (standard-edn-response
+    (data/get-hero-data (:hero-id path-params))))
+
 
 (defn routes []
   [["/" {:get {:handler index-handler}}]
@@ -65,9 +71,11 @@
                         :parameters {:path {:item-id int?}}}}]]
    ["/about" {:get {:handler index-handler}}]
    ["/api"
-    ["" {:get {:handler api-version-handler}}]
+    ["/version" {:get {:handler api-version-handler}}]
     ["/heroes"
-     ["" {:get {:handler api-hero-list}}]]]])
+     ["" {:get {:handler api-hero-list}}]
+     ["/:hero-id" {:get {:handler api-hero-handler
+                         :parameters {:path {:item-id int?}}}}]]]])
 
 (def app
   (reitit-ring/ring-handler
