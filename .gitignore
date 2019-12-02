@@ -1,5 +1,6 @@
-./target
-./out
+target/
+out/
+*.swp
 .lein*
 .lein-repl-history
 .nrepl-port
