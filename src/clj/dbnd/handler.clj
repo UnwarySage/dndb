@@ -3,7 +3,17 @@
    [reitit.ring :as reitit-ring]
    [dbnd.middleware :refer [middleware]]
    [hiccup.page :refer [include-js include-css html5]]
-   [config.core :refer [env]]))
+   [config.core :refer [env]]
+   [dbnd.data :as data]))
+
+
+(defn standard-edn-response
+  "Wraps something in an end wrapper"
+  [body]
+  {:status 200
+   :headers {"Content-Type" "text/edn"}
+   :body (str body)})
+
 
 (def mount-target
   [:div#app
@@ -25,22 +35,53 @@
     mount-target
     (include-js "/js/app.js")]))
 
-
 (defn index-handler
   [_request]
   {:status 200
    :headers {"Content-Type" "text/html"}
    :body (loading-page)})
 
+(defn api-version-handler
+  [_request]
+  {:status 200
+   :headers {"Content-Type" "text/edn"}
+   :body (str {:api-version "0.0.1"})})
+
+(defn api-hero-list 
+  [_request]
+  (standard-edn-response
+    (data/get-hero-names)))    
+ 
+(defn api-hero-handler
+  [{:keys [path-params] :as request}]
+  (println path-params)
+  (standard-edn-response
+    (data/get-hero-data (:hero-id path-params))))
+
+
+(defn routes []
+  [["/" {:get {:handler index-handler}}]
+   ["/items"
+    ["" {:get {:handler index-handler}}]
+    ["/:item-id" {:get {:handler index-handler
+                        :parameters {:path {:item-id int?}}}}]]
+   ["/heroes"
+    ["" {:get {:handler index-handler}}]
+    ["/:hero-id" {:get {:handler index-handler
+                        :parameters {:path {:item-id int?}}}}]]
+   ["/about" {:get {:handler index-handler}}]
+   ["/api"
+    ["/version" {:get {:handler api-version-handler}}]
+    ["/heroes"
+     ["" {:get {:handler api-hero-list}}]
+     ["/:hero-id" {:get {:handler api-hero-handler
+                         :parameters {:path {:item-id int?}}}}]]]])
+
 (def app
   (reitit-ring/ring-handler
-   (reitit-ring/router
-    [["/" {:get {:handler index-handler}}]
-     ["/items"
-      ["" {:get {:handler index-handler}}]
-      ["/:item-id" {:get {:handler index-handler
-                          :parameters {:path {:item-id int?}}}}]]
-     ["/about" {:get {:handler index-handler}}]])
+    (if (env :dev)
+      (reitit-ring/router (routes))
+      (constantly (reitit-ring/router (routes))))
    (reitit-ring/routes
     (reitit-ring/create-resource-handler {:path "/" :root "/public"})
     (reitit-ring/create-default-handler))

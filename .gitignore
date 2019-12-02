@@ -1,8 +1,9 @@
-./target
-./out
+target/
+out/
+*.swp
 .lein*
 .lein-repl-history
 .nrepl-port
 .nrepl-history
 .figwheel_server.log
-
+credentials.edn
