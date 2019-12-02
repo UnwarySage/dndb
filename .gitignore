@@ -6,4 +6,4 @@ out/
 .nrepl-port
 .nrepl-history
 .figwheel_server.log
-
+credentials.edn

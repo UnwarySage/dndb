@@ -36,8 +36,6 @@
       [:h1 "Welcome to DBnD"]
       [:p.flow-text "DBnD is the premiere fictional services exchange. Here, bold heroes can find wise mentors, accept perilous quests, and recieve their just rewards."]]]))
 
-
-
 (defn items-page []
   (fn []
     [:div.container
@@ -46,7 +44,6 @@
                  [:a.collection-item {:href (path-for :item {:item-id item-id}) :key (str "item-" item-id)}  "Item: " item-id])
                (range 1 6))]]))
 
-
 (defn item-page []
   (fn []
     (let [routing-data (session/get :route)
@@ -54,7 +51,6 @@
       [:div.container
        [:h1 (str "Item " item " of dbnd")]
        [:p [:a {:href (path-for :items)} "Back to the list of items"]]])))
-
 
 (defn about-page []
   (fn [] [:div.container
@@ -115,6 +111,7 @@
 ;; -------------------------
 ;; Translate routes -> page components
 
+
 (defn page-for [route]
   (case route
     :index #'home-page
@@ -127,6 +124,7 @@
 
 ;; -------------------------
 ;; Page mounting component
+
 
 (defn current-page []
   (fn []
@@ -156,7 +154,7 @@
         (session/put! :route {:current-page (page-for current-page)
                               :route-params route-params})
         (clerk/navigate-page! path)))
-        
+
     :path-exists?
     (fn [path]
       (boolean (reitit/match-by-path router path)))})
