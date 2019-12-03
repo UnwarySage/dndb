@@ -41,22 +41,6 @@
       [:h1 "Welcome to DBnD"]
       [:p.flow-text "DBnD is the premiere fictional services exchange. Here, bold heroes can find wise mentors, accept perilous quests, and recieve their just rewards."]]]))
 
-(defn items-page []
-  (fn []
-    [:div.container
-     [:h1 "The items of dbnd"]
-     [:ul.collection (map (fn [item-id]
-                            [:a.collection-item {:href (path-for :item {:item-id item-id}) :key (str "item-" item-id)}  "Item: " item-id]))
-               (range 1 6)]]))
-
-(defn item-page []
-  (fn []
-    (let [routing-data (session/get :route)
-          item (get-in routing-data [:route-params :item-id])]
-      [:div.container
-       [:h1 (str "Item " item " of dbnd")]
-       [:p [:a {:href (path-for :items)} "Back to the list of items"]]])))
-
 (defn about-page []
   (fn [] [:div.container
             [:h1 "About dbnd"]
@@ -82,8 +66,6 @@
            [:ul#nav-mobile.left.hide-on-med-and-down
             [:li
              [:a {:href (path-for :index)}"Home"]] 
-            [:li
-             [:a {:href (path-for :items)}"Items"]]
             [:li
              [:a {:href (path-for :heroes)}"Heroes"]]
             [:li 
@@ -137,8 +119,6 @@
   (case route
     :index #'home-page
     :about #'about-page
-    :items #'items-page
-    :item #'item-page
     :hero #'hero-page
     :heroes #'heroes-page))
 
