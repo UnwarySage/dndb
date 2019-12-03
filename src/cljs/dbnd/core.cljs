@@ -4,7 +4,12 @@
    [reagent.session :as session]
    [reitit.frontend :as reitit]
    [clerk.core :as clerk]
-   [accountant.core :as accountant]))
+   [accountant.core :as accountant]
+   [cljs-http.client :as http]
+   [cljs.core.async :refer [<! take!]]
+   [cljs.reader :as reader])
+  (:require-macros
+    [cljs.core.async.macros :refer [go]]))
 
 ;; -------------------------
 ;; Routes
@@ -41,8 +46,8 @@
     [:div.container
      [:h1 "The items of dbnd"]
      [:ul.collection (map (fn [item-id]
-                 [:a.collection-item {:href (path-for :item {:item-id item-id}) :key (str "item-" item-id)}  "Item: " item-id])
-               (range 1 6))]]))
+                            [:a.collection-item {:href (path-for :item {:item-id item-id}) :key (str "item-" item-id)}  "Item: " item-id]))
+               (range 1 6)]]))
 
 (defn item-page []
   (fn []
@@ -84,29 +89,45 @@
             [:li 
              [:a {:href (path-for :about)} "About"]]]]]))
 
+(defn fetch-heroes-data []
+  (let [fetching-atom (atom #{})
+        _  (take! (http/get "http://localhost:3449/api/heroes")
+                  #(reset! fetching-atom (reader/read-string (:body %))))]
+   fetching-atom))
+
+
 (defn heroes-page []
-  (fn []
-    [:div.container
-     [:h1 "Heroes"]
-     [:ul.collection (map (fn [hero-id]
-      [:a.collection-item {:href (path-for :hero {:hero-id hero-id})} "Hero Id: " hero-id])
-      (range 1 6))]])) 
-      
+  (let [heroes-data (fetch-heroes-data)]
+    (fn []
+      [:div.container
+       [:h1 "Heroes"]
+       [:ul.collection
+        (map (fn [hero]
+              [:li.collection-item
+               [:a 
+                {:key (:hero-id hero)
+                 :href (path-for :hero {:hero-id (:hero-id hero)})}
+                (:hero-name hero)]])
+         @heroes-data)]])))
+
+
+(defn fetch-hero-data [hero-id inp-atom]
+ (let [request-chan  (http/get (str "http://localhost:3449/api/heroes/" hero-id))
+       _ (take! request-chan #(reset! inp-atom (reader/read-string (:body %))))]
+   inp-atom))
           
 (defn hero-page [] 
-  (fn []
     (let [routing-data (session/get :route)
           hero (get-in routing-data [:route-params :hero-id])
-          hero-data {:hero-name "Songbird" 
-                     :hero-race "Kenku" 
-                     :hero-class "Rogue" 
-                     :hero-bio "Angst. All the angst. And then some."}]   
-      [:div.container
-       [:div.card
-        [:div.card-content
-         [:span.card-title hero (:hero-name hero-data)]
-         [:p (str (:hero-race hero-data) " " (:hero-class hero-data))]
-         [:p.flow-text (:hero-bio hero-data)]]]])))
+          hero-data (atom {:hero-name "Loading..."})
+          _ (fetch-hero-data hero hero-data)]
+      (fn []   
+         [:div.container
+          [:div.card
+           [:div.card-content
+            [:span.card-title (:hero-name @hero-data)]
+            [:p (str (:hero-race @hero-data) " " (:hero-class @hero-data))]
+            [:p.flow-text (:hero-bio @hero-data)]]]])))
 
 ;; -------------------------
 ;; Translate routes -> page components

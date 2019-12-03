@@ -28,5 +28,10 @@
 (defn get-hero-data 
   [hero-id]
   (let [command (str "select * from Heroes where Hero_ID = " hero-id ";")
-        _ (println command)]
-    (jdbc/execute-one! ds [command])))
+        res (jdbc/execute-one! ds [command])]
+    {:hero-name (:Heroes/Hero_Name res)
+     :hero-id (:Heroes/Hero_ID res)
+     :hero-race (:Heroes/Race res)
+     :hero-level (:Heroes/Total_Lvl res)
+     :hero-class (:Heroes/Class res)
+     :hero-bio (:Heroes/Bio res)}))
