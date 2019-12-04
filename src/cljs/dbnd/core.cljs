@@ -31,6 +31,21 @@
     (:path (reitit/match-by-name router route))))
 
 (path-for :about)
+;;-------------------------
+;; Data helpers
+(def api-path "http://localhost:3449/api/")
+
+(defn atom-from-api 
+  ([inp-url]
+   (atom-from-api inp-url {}))
+  ([inp-url options]
+   (let [response-atom (atom nil)
+         request-chan (http/get (str api-path inp-url) options)
+         _swap-atom (take! request-chan 
+                           #(reset! response-atom 
+                                   (reader/read-string (:body %))))]
+    response-atom)))
+
 ;; -------------------------
 ;; Page components
 
@@ -79,7 +94,7 @@
 
 
 (defn heroes-page []
-  (let [heroes-data (fetch-heroes-data)]
+  (let [heroes-data (atom-from-api "heroes")]
     (fn []
       [:div.container
        [:h1 "Heroes"]
@@ -93,23 +108,18 @@
          @heroes-data)]])))
 
 
-(defn fetch-hero-data [hero-id inp-atom]
- (let [request-chan  (http/get (str "http://localhost:3449/api/heroes/" hero-id))
-       _ (take! request-chan #(reset! inp-atom (reader/read-string (:body %))))]
-   inp-atom))
-          
+         
 (defn hero-page [] 
     (let [routing-data (session/get :route)
           hero (get-in routing-data [:route-params :hero-id])
-          hero-data (atom {:hero-name "Loading..."})
-          _ (fetch-hero-data hero hero-data)]
-      (fn []   
-         [:div.container
-          [:div.card
-           [:div.card-content
-            [:span.card-title (:hero-name @hero-data)]
-            [:p (str (:hero-race @hero-data) " " (:hero-class @hero-data))]
-            [:p.flow-text (:hero-bio @hero-data)]]]])))
+          hero-data (atom-from-api (str "heroes/" hero))]
+     (fn []   
+        [:div.container
+         [:div.card
+          [:div.card-content
+           [:span.card-title (:hero-name @hero-data)]
+           [:p (str (:hero-race @hero-data) " " (:hero-class @hero-data))]
+           [:p.flow-text (:hero-bio @hero-data)]]]])))
 
 ;; -------------------------
 ;; Translate routes -> page components
