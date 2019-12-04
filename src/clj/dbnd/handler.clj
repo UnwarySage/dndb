@@ -58,6 +58,14 @@
   (standard-edn-response
     (data/get-hero-data (:hero-id path-params))))
 
+(defn api-patron-list [_request]
+  (standard-edn-response
+    (data/get-patrons)))
+
+(defn api-patron-handler 
+  [{:keys [path-params] :as request}]
+  (standard-edn-response
+    (data/get-patron-data (:patron-id path-params))))
 
 (defn routes []
   [["/" {:get {:handler index-handler}}]
@@ -69,13 +77,21 @@
     ["" {:get {:handler index-handler}}]
     ["/:hero-id" {:get {:handler index-handler
                         :parameters {:path {:item-id int?}}}}]]
+   ["/patrons"
+    ["" {:get {:handler index-handler}}]
+    ["/:patron-id" {:get {:handler index-handler
+                          :parameters {:path {:item-id int?}}}}]]
    ["/about" {:get {:handler index-handler}}]
    ["/api"
     ["/version" {:get {:handler api-version-handler}}]
     ["/heroes"
      ["" {:get {:handler api-hero-list}}]
      ["/:hero-id" {:get {:handler api-hero-handler
-                         :parameters {:path {:item-id int?}}}}]]]])
+                         :parameters {:path {:item-id int?}}}}]]
+    ["/patrons"
+     ["" {:get {:handler api-patron-list}}]
+     ["/:patron-id" {:get {:handler api-patron-handler
+                           :parameters {:path {:patron-id int?}}}}]]]])
 
 (def app
   (reitit-ring/ring-handler

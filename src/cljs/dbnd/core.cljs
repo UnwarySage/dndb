@@ -23,6 +23,9 @@
     ["/heroes"
      ["" :heroes]
      ["/:hero-id" :hero]]
+    ["/patrons"
+     ["" :patrons]
+     ["/:patron-id" :patron]]
     ["/about" :about]]))
 
 (defn path-for [route & [params]]
@@ -83,6 +86,8 @@
              [:a {:href (path-for :index)}"Home"]] 
             [:li
              [:a {:href (path-for :heroes)}"Heroes"]]
+            [:li
+             [:a {:href (path-for :patrons)} "Patrons"]]
             [:li 
              [:a {:href (path-for :about)} "About"]]]]]))
 
@@ -108,18 +113,44 @@
          @heroes-data)]])))
 
 
-         
 (defn hero-page [] 
+   (let [routing-data (session/get :route)
+         hero (get-in routing-data [:route-params :hero-id])
+         hero-data (atom-from-api (str "heroes/" hero))]
+    (fn []   
+       [:div.container
+        [:div.card
+         [:div.card-content
+          [:span.card-title (:hero-name @hero-data)]
+          [:p (str (:hero-race @hero-data) " " (:hero-class @hero-data))]
+          [:p.flow-text (:hero-bio @hero-data)]]]])))
+
+        
+(defn patrons-page []
+  (let [patrons-data (atom-from-api "patrons")]
+    (fn []
+      [:div.container
+       [:h1 "Patrons"]
+       [:ul.collection
+        (map (fn [patron]
+               [:li.collection-item
+                [:a {:key (:patron-id patron)
+                     :href (path-for :patron {:patron-id (:patron-id patron)})}
+                 (:patron-name patron)]])
+             @patrons-data)]])))
+
+(defn patron-page [] 
     (let [routing-data (session/get :route)
-          hero (get-in routing-data [:route-params :hero-id])
-          hero-data (atom-from-api (str "heroes/" hero))]
+          patron (get-in routing-data [:route-params :patron-id])
+          patron-data (atom-from-api (str "patrons/" patron))]
      (fn []   
         [:div.container
          [:div.card
           [:div.card-content
-           [:span.card-title (:hero-name @hero-data)]
-           [:p (str (:hero-race @hero-data) " " (:hero-class @hero-data))]
-           [:p.flow-text (:hero-bio @hero-data)]]]])))
+           [:span.card-title (:patron-name @patron-data)]
+           [:p (str (:patron-location @patron-data))]
+           [:p.flow-text (:patron-notes @patron-data)]]]])))
+
 
 ;; -------------------------
 ;; Translate routes -> page components
@@ -130,7 +161,9 @@
     :index #'home-page
     :about #'about-page
     :hero #'hero-page
-    :heroes #'heroes-page))
+    :heroes #'heroes-page
+    :patrons #'patrons-page
+    :patron #'patron-page))
 
 
 ;; -------------------------
