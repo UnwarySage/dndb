@@ -106,18 +106,37 @@
              [:a {:href (path-for :about)} "About"]]]]]))
 
 (defn heroes-page []
-  (let [heroes-data (atom-from-api "heroes")]
+  (let [available-heroes-data (atom-from-api "heroes-available")
+        unavailable-heroes-data (atom-from-api "heroes-not-available")]
     (fn []
       [:div.container
        [:h1 "Heroes"]
-       [:ul.collection
-        (map (fn [hero]
-               [:li.collection-item
-                [:a
-                 {:key (:hero-id hero)
-                  :href (path-for :hero {:hero-id (:hero-id hero)})}
-                 (:hero-name hero)]])
-             @heroes-data)]])))
+       [:div.row
+        [:div.col.s6
+         [:h4 "Available"]
+         (if (not (empty? @available-heroes-data))
+             [:ul.collection
+               (map (fn [hero]
+                      [:li.collection-item
+                       [:a
+                        {:key (:hero-id hero)
+                         :href (path-for :hero {:hero-id (:hero-id hero)})}
+                        (:hero-name hero)]])
+                    @available-heroes-data)]
+            [:h6 "No heroes available"])]
+        [:div.col.s6
+         [:h4 "Unavailable"]
+         (if (not (empty? @unavailable-heroes-data))
+             [:ul.collection 
+                (map
+                  (fn [hero]
+                    [:li.collection-item
+                     [:a
+                      {:key (:hero-id hero)
+                       :href (path-for :hero {:hero-id (:hero-id hero)})}
+                      (:hero-name hero)]])
+                  @unavailable-heroes-data)]
+            [:h6 "All heroes available"])]]]))) 
 
 (defn hero-page []
   (let [routing-data (session/get :route)
@@ -125,7 +144,8 @@
         hero-data (atom-from-api (str "heroes/" hero))
         local-state (atom {})]
     (fn []
-      [:div.container 
+      [:div.container] 
+      [:p.flow-text (str @hero-data)
        [:div.card
         [:div.card-content
          [:span.card-title (:hero-name @hero-data)]
@@ -138,9 +158,7 @@
                         (swap! local-state update :available not)
                         (set-hero-availability hero (:available @local-state))))}
           (if (nil? (:available @local-state))
-              (if (:hero-available @hero-data)
-                  "Available"
-                  "Unavailable")
+              "Toggle Available"  
               (if (:available @local-state)
                   "Available"
                   "Unavailable"))]]]]))) 

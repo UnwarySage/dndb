@@ -87,6 +87,14 @@
   [{:keys [path-params query-params] :as request}]
   (data/make-claim (:offer-id path-params) (get query-params "hero-id") (get query-params "reward")))
 
+(defn api-heroes-available-list [_request]
+  (standard-edn-response 
+    (data/get-hero-avail)))
+
+(defn api-heroes-unavailable-list [_request]
+  (standard-edn-response
+    (data/get-hero-navail)))
+
 (defn api-set-hero-availability 
   [{:keys [path-params query-params] :as request}]
   (data/set-hero-availability (:hero-id path-params) (get query-params "availability"))) 
@@ -107,6 +115,8 @@
     ["/version" {:get {:handler api-version-handler}}]
     ["/heroes"
      ["" {:get {:handler api-hero-list}}]
+     ["-available" {:get {:handler api-heroes-available-list}}]
+     ["-not-available" {:get {:handler api-heroes-unavailable-list}}]
      ["/:hero-id" {:get {:handler api-hero-handler
                          :parameters {:path {:item-id int?}}}}]
      ["/:hero-id/set-avail" {:get {:handler api-set-hero-availability

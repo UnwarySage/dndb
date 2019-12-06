@@ -21,7 +21,7 @@
    :hero-level (:Heroes/Total_Lvl res)
    :hero-class (:Heroes/Class res)
    :hero-bio (:Heroes/Bio res)
-   :hero-available (:Heroes/Availible res)})
+   :hero-available (:Heroes/Available res)})
 
 (defn get-hero-names []
   (into #{}
@@ -40,16 +40,16 @@
 (defn get-hero-avail []
   (into #{}
     (map hero-mappings)
-      (jdbc/plan
-        ds
-        ["select * from hero_avail"])))
+    (jdbc/plan
+      ds
+      ["select * from hero_avail"])))
 
 (defn get-hero-navail []
   (into #{}
-  (map hero-mappings)
-    (jdbc/plan
-      ds
-      ["select * from hero_navail"])))
+   (map hero-mappings)
+   (jdbc/plan
+     ds
+     ["select * from hero_navail"])))
 ;;----------------
 ;;Patrons
 (defn patron-mappings [res]
