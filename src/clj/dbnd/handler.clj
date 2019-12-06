@@ -86,9 +86,9 @@
     (data/get-offer-data (:offer-id path-params))))
 
 (defn api-make-claim-handler 
-  [{:keys [path-params] :as request}]
-  (data/make-claim (:offer-id path-params) (:hero-id path-params))
-  (standard-edn-response ""))
+  [{:keys [path-params query-params] :as request}]
+  (data/make-claim (:offer-id path-params) (get query-params "hero-id") (get query-params "reward"))
+  (standard-edn-response (str request)))
 
 (defn routes []
   [["/" {:get {:handler index-handler}}]
@@ -120,8 +120,10 @@
      ["/:offer-id"
       ["" {:get {:handler api-offer-handler}
                 :parameters {:path {:offer-id int?}}}]
-      ["/claim/:hero-id" {:get {:handler api-make-claim-handler
-                                :parameters {:path {:hero-id int?}}}}]]]]])  
+      ["/claim" {:get {:handler api-make-claim-handler
+                       :parameters {:path {:hero-id int?}
+                                    :query {:reward string?
+                                            :hero-id int?}}}}]]]]])  
 (def app
   (reitit-ring/ring-handler
     (if (env :dev)

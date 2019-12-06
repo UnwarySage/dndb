@@ -52,9 +52,10 @@
                                    (reader/read-string (:body %))))]
     response-atom)))
 
-(defn make-claim [inp-event offer-id hero-id]
-  (.-preventDefault inp-event)
-  ((http/get (str api-path "/offers" offer-id "/claim/" hero-id))))
+(defn make-claim [inp-event offer-id hero-id reward]
+  (http/get (str api-path "offers/" offer-id "/claim")
+            {:query-params {:reward reward
+                            :hero-id hero-id}}))
 ;; -------------------------
 ;; Page components
 
@@ -196,29 +197,64 @@
 (defn offer-page []
  (let [routing-data (session/get :route)
           offer (get-in routing-data [:route-params :offer-id])
-          offer-data (atom-from-api (str "offers/" offer))]
+          offer-data (atom-from-api (str "offers/" offer))
+          hero-data (atom-from-api "heroes")
+          local-state (atom {:making-claim false
+                             :selected-hero nil
+                             :reward nil})]
      (fn []   
         [:div.container
-         [:p.flow-text (str @offer-data)]
          [:div.card
           [:div.card-content
            [:span.card-title (:quest-name @offer-data)]
            [:div.row
             [:div.col.s8 
              [:h6 (:quest-location @offer-data)]
-             [:p (:quest-notes @offer-data)]]
+             [:p (:quest-notes @offer-data)]
+             [:h6 "Rewards"]
+             [:p (:quest-rewards @offer-data)]]
             [:div.col.s4
              [:h6 "Offered by"]
              [:h6 
               [:a {:href (path-for :patron {:patron-id (:patron-id @offer-data)})} 
                   (:patron-name @offer-data)]]
              [:h6 (:patron-location @offer-data)]]]]
-          [:div.card-action
-           [:a {:href "#"
-                :on-click (fn [e]
-                            (make-claim e (:offer-id @offer-data)
-                                          1))}
-            "Claim This Offer"]]]])))
+          (if (:making-claim @local-state)
+              [:div.card-action 
+               (doall
+                 (map (fn [hero]
+                        [:label {:key (:hero-id hero)}
+                         [:button.btn {:on-click (fn [e]
+                                                   (.preventDefault e)
+                                                   (swap! local-state assoc :selected-hero (:hero-id hero)))} 
+                           [:span (:hero-name hero)]]])
+                     @hero-data))
+               [:label
+                [:div]
+                (get
+                  (reduce #(merge %1 {(:hero-id %2) (:hero-name %2)})
+                          {}
+                          @hero-data)
+                  (:selected-hero @local-state))]
+               [:div.input-field
+                [:input {:type :text 
+                         :placeholder (:quest-rewards @offer-data)
+                         :on-change (fn [e] (swap! local-state assoc :reward (-> e .-target .-value)))}]]
+               [:button.btn-flat.waves-effect {:on-click (fn [e] 
+                                                          (do                            
+                                                           (make-claim e (:offer-id @offer-data)
+                                                                         (:selected-hero @local-state)
+                                                                         (:reward @local-state))
+                                                           (reset! local-state {:making-claim false})))
+                                               :class (when-not (and (:selected-hero @local-state))
+                                                        "disabled")}
+                                                                          
+                "Claim"]]
+              [:div.card-action 
+               [:a {:href "#"
+                    :on-click (fn [e] (swap! local-state assoc :making-claim true))}                        
+                "Make a claim"]])]])))
+          
                             
             
 ; -------------------------

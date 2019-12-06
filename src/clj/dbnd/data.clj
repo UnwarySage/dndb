@@ -59,7 +59,7 @@
       [(str "select * from Patron where Patron_ID = " patron-id)])))
 ;;-------------
 ;; Offers
-(def get-quest-data (constantly {:quest-name "Dread Tiding"
+(def get-quest-data (constantly {:quest-name "Dread Tidings"
                                  :quest-location "Port Azure"
                                  :quest-rewards "Sevula's Eternal Blade, 450XP"
                                  :quest-notes "Deliver news of the death of Umulthud to Sevula, and remind him of his promise"}))
@@ -85,8 +85,8 @@
        (map #(get-offer-data (:Offers/Offer_ID %)))
      (jdbc/execute! ds ["select Offer_ID from Offers;"])))
 
-(defn make-claim [offer-id hero-id]
-  (jdbc/execute! ds [(str "insert Claims (Hero_ID, Offer_ID) values (" hero-id "," offer-id ");")]))
+(defn make-claim [offer-id hero-id payment]
+  (jdbc/execute! ds [(str "insert Claims (Hero_ID, Offer_ID,Payment) values (" hero-id "," offer-id ",\"" payment "\");")]))
  
 
 (defn claim-mappings [inp]
