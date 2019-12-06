@@ -67,12 +67,31 @@
   (standard-edn-response
     (data/get-patron-data (:patron-id path-params))))
 
+(defn api-claim-list [_request]
+  (standard-edn-response
+    (data/get-claims)))
+
+(defn api-claim-handler
+  [{:keys [path-params] :as request}]
+  (standard-edn-response
+    (data/get-claim-data (:claim-offer-id path-params))))
+
+(defn api-offer-list [_request]
+ (standard-edn-response
+   (data/get-offers)))
+
+(defn api-offer-handler 
+  [{:keys [path-params] :as request}]
+  (standard-edn-response
+    (data/get-offer-data (:offer-id path-params))))
+
+(defn api-make-claim-handler 
+  [{:keys [path-params] :as request}]
+  (data/make-claim (:offer-id path-params) (:hero-id path-params))
+  (standard-edn-response ""))
+
 (defn routes []
   [["/" {:get {:handler index-handler}}]
-   ["/items"
-    ["" {:get {:handler index-handler}}]
-    ["/:item-id" {:get {:handler index-handler
-                        :parameters {:path {:item-id int?}}}}]]
    ["/heroes"
     ["" {:get {:handler index-handler}}]
     ["/:hero-id" {:get {:handler index-handler
@@ -91,8 +110,18 @@
     ["/patrons"
      ["" {:get {:handler api-patron-list}}]
      ["/:patron-id" {:get {:handler api-patron-handler
-                           :parameters {:path {:patron-id int?}}}}]]]])
-
+                           :parameters {:path {:patron-id int?}}}}]]
+    ["/claims"
+     ["" {:get {:handler api-claim-list}}]
+     ["/:claim-offer-id" {:get {:handler api-claim-handler
+                                :parameters {:path {:claim-offer-id int?}}}}]]
+    ["/offers"
+     ["" {:get {:handler api-offer-list}}]
+     ["/:offer-id"
+      ["" {:get {:handler api-offer-handler}
+                :parameters {:path {:offer-id int?}}}]
+      ["/claim/:hero-id" {:get {:handler api-make-claim-handler
+                                :parameters {:path {:hero-id int?}}}}]]]]])  
 (def app
   (reitit-ring/ring-handler
     (if (env :dev)

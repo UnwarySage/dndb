@@ -16,16 +16,19 @@
 
 (def router
   (reitit/router
-   [["/" :index]
-    ["/items"
-     ["" :items]
-     ["/:item-id" :item]]
+   [["/" :index] 
     ["/heroes"
      ["" :heroes]
      ["/:hero-id" :hero]]
     ["/patrons"
      ["" :patrons]
      ["/:patron-id" :patron]]
+    ["/claims"
+     ["" :claims]
+     ["/:claim-id" :claim]]
+    ["/offers"
+     ["" :offers]
+     ["/:offer-id" :offer]]
     ["/about" :about]]))
 
 (defn path-for [route & [params]]
@@ -49,6 +52,9 @@
                                    (reader/read-string (:body %))))]
     response-atom)))
 
+(defn make-claim [inp-event offer-id hero-id]
+  (.-preventDefault inp-event)
+  ((http/get (str api-path "/offers" offer-id "/claim/" hero-id))))
 ;; -------------------------
 ;; Page components
 
@@ -88,15 +94,12 @@
              [:a {:href (path-for :heroes)}"Heroes"]]
             [:li
              [:a {:href (path-for :patrons)} "Patrons"]]
+            [:li
+             [:a {:href (path-for :offers)} "Offers"]]
+            [:li
+              [:a {:href (path-for :claims)} "Claims"]]
             [:li 
              [:a {:href (path-for :about)} "About"]]]]]))
-
-(defn fetch-heroes-data []
-  (let [fetching-atom (atom #{})
-        _  (take! (http/get "http://localhost:3449/api/heroes")
-                  #(reset! fetching-atom (reader/read-string (:body %))))]
-   fetching-atom))
-
 
 (defn heroes-page []
   (let [heroes-data (atom-from-api "heroes")]
@@ -151,8 +154,74 @@
            [:p (str (:patron-location @patron-data))]
            [:p.flow-text (:patron-notes @patron-data)]]]])))
 
+(defn claims-page []
+  (let [claims-data (atom-from-api "claims")]
+    (fn []
+      [:div.container
+       [:h1 "Claims"]
+       [:ul.collection
+        (map (fn [claim]
+              [:li.collection-item {:key (:offer-id claim)}
+               [:a {:href (path-for :claim {:claim-id (:claim-offer-id claim)})}
+                (str (:hero-name claim) " "  (:claim-offer-id claim))]])
+            @claims-data)]])))
 
-;; -------------------------
+(defn claim-page []
+ (let [routing-data (session/get :route)
+          claim (get-in routing-data [:route-params :claim-offer-id])
+          claim-data (atom-from-api (str "claims/" claim))]
+     (fn []   
+        [:div.container
+         [:div.card
+          [:div.card-content
+           [:span.card-title (:patron-name @claim-data)]
+           [:p (str (:patron-location @claim-data))]
+           [:p.flow-text (:patron-notes @claim-data)]]]])))
+
+
+(defn offers-page []
+  (let [offers-data (atom-from-api "offers")]
+    (fn []
+      [:div.container
+       [:h1 "Offers"]
+       [:ul.collection
+        (map (fn [offer]
+               [:li.collection-item {:key (:offer-id offer)}
+                [:div.left-align
+                 [:a {:href (path-for :offer {:offer-id (:offer-id offer)})}
+                  (:quest-name offer)]
+                 [:div (:quest-location offer)]]])                
+             @offers-data)]])))
+
+(defn offer-page []
+ (let [routing-data (session/get :route)
+          offer (get-in routing-data [:route-params :offer-id])
+          offer-data (atom-from-api (str "offers/" offer))]
+     (fn []   
+        [:div.container
+         [:p.flow-text (str @offer-data)]
+         [:div.card
+          [:div.card-content
+           [:span.card-title (:quest-name @offer-data)]
+           [:div.row
+            [:div.col.s8 
+             [:h6 (:quest-location @offer-data)]
+             [:p (:quest-notes @offer-data)]]
+            [:div.col.s4
+             [:h6 "Offered by"]
+             [:h6 
+              [:a {:href (path-for :patron {:patron-id (:patron-id @offer-data)})} 
+                  (:patron-name @offer-data)]]
+             [:h6 (:patron-location @offer-data)]]]]
+          [:div.card-action
+           [:a {:href "#"
+                :on-click (fn [e]
+                            (make-claim e (:offer-id @offer-data)
+                                          1))}
+            "Claim This Offer"]]]])))
+                            
+            
+; -------------------------
 ;; Translate routes -> page components
 
 
@@ -163,8 +232,12 @@
     :hero #'hero-page
     :heroes #'heroes-page
     :patrons #'patrons-page
-    :patron #'patron-page))
-
+    :patron #'patron-page
+    :claims #'claims-page
+    :claim #'claim-page
+    :offers #'offers-page
+    :offer #'offer-page))
+   
 
 ;; -------------------------
 ;; Page mounting component
