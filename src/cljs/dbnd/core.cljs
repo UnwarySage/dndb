@@ -148,9 +148,15 @@
       [:p.flow-text (str @hero-data)
        [:div.card
         [:div.card-content
-         [:span.card-title (:hero-name @hero-data)]
+         [:span.card-title 
+          [:a {:href (path-for :heroes)} "<"]
+          (:hero-name @hero-data)]
          [:p (str (:hero-race @hero-data) " " (:hero-class @hero-data))]
-         [:p.flow-text (:hero-bio @hero-data)]]
+         [:p.flow-text (:hero-bio @hero-data)]
+         (when (:hero-last-claim-id @hero-data)
+           [:div
+            [:h6 "Last claimed reward"]
+            [:p.flow-text (:claim-payment @hero-data)]])]
         [:div.card-action
          [:button.btn-flat 
           {:on-click (fn [e]
@@ -161,7 +167,8 @@
               "Toggle Available"  
               (if (:available @local-state)
                   "Available"
-                  "Unavailable"))]]]]))) 
+                  "Unavailable"))]]]])))
+          
                          
           
                                

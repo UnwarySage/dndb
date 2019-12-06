@@ -21,18 +21,23 @@
    :hero-level (:Heroes/Total_Lvl res)
    :hero-class (:Heroes/Class res)
    :hero-bio (:Heroes/Bio res)
-   :hero-available (:Heroes/Available res)})
+   :hero-available (:Heroes/Available res)
+   :hero-last-claim-id (:Heroes/LastClaim_ID res)})
 
 (defn get-hero-names []
   (into #{}
         (map hero-mappings)
         (jdbc/plan ds ["select * from Heroes"])))
 
+(declare get-bare-claim-data)
+
 (defn get-hero-data
   [hero-id]
   (let [command (str "select * from Heroes where Hero_ID = " hero-id ";")
-        res (jdbc/execute-one! ds [command])]
-    (hero-mappings res)))
+        hero-data (hero-mappings (jdbc/execute-one! ds [command]))
+        claim-data (when (:hero-last-claim-id hero-data)
+                         (get-bare-claim-data (:hero-last-claim-id hero-data)))]
+    (merge claim-data hero-data)))
 
 (defn set-hero-availability [hero-id availability]
   (jdbc/execute-one! ds [(str "update Heroes set Available = " availability " where Hero_ID = " hero-id ";")]))
@@ -112,6 +117,12 @@
    :claim-payment (:Claims/Payment inp)
    :claim-date (:Claims/Date inp)
    :claim-id (:Claims/Claim_ID inp)})
+
+(defn get-bare-claim-data [claim-id]
+  (claim-mappings
+    (jdbc/execute-one!
+     ds
+     [(str "select * from Claims where Claim_ID = " claim-id ";")])))
 
 (defn get-claim-data [claim-id]
   (let [claim-result (claim-mappings
