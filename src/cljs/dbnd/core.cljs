@@ -242,7 +242,9 @@
                                                                      (:selected-hero @local-state)
                                                                      (:reward @local-state))
                                                          (reset! local-state {:making-claim false})))
-                                           :class (when-not (and (:selected-hero @local-state))
+                                           :class (when-not (and (:selected-hero @local-state)
+                                                                 (:reward @local-state)
+                                                                 (not= "" (:reward @local-state)))
                                                     "disabled")}
 
             "Claim"]]
