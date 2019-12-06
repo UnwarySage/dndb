@@ -37,6 +37,19 @@
 (defn set-hero-availability [hero-id availability]
   (jdbc/execute-one! ds [(str "update Heroes set Available = " availability " where Hero_ID = " hero-id ";")]))
 
+(defn get-hero-avail []
+  (into #{}
+    (map hero-mappings)
+      (jdbc/plan
+        ds
+        ["select * from hero_avail"])))
+
+(defn get-hero-navail []
+  (into #{}
+  (map hero-mappings)
+    (jdbc/plan
+      ds
+      ["select * from hero_navail"])))
 ;;----------------
 ;;Patrons
 (defn patron-mappings [res]
@@ -113,5 +126,6 @@
   (into #{}
         (map #(get-claim-data (:Claims/Claim_ID %)))
         (jdbc/execute! ds ["select Claim_ID from Claims"])))
+
 
 
