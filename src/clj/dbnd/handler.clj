@@ -6,14 +6,12 @@
    [config.core :refer [env]]
    [dbnd.data :as data]))
 
-
 (defn standard-edn-response
   "Wraps something in an end wrapper"
   [body]
   {:status 200
    :headers {"Content-Type" "text/edn"}
    :body (str body)})
-
 
 (def mount-target
   [:div#app
@@ -47,48 +45,47 @@
    :headers {"Content-Type" "text/edn"}
    :body (str {:api-version "0.0.1"})})
 
-(defn api-hero-list 
+(defn api-hero-list
   [_request]
   (standard-edn-response
-    (data/get-hero-names)))    
- 
+   (data/get-hero-names)))
+
 (defn api-hero-handler
   [{:keys [path-params] :as request}]
   (println path-params)
   (standard-edn-response
-    (data/get-hero-data (:hero-id path-params))))
+   (data/get-hero-data (:hero-id path-params))))
 
 (defn api-patron-list [_request]
   (standard-edn-response
-    (data/get-patrons)))
+   (data/get-patrons)))
 
-(defn api-patron-handler 
+(defn api-patron-handler
   [{:keys [path-params] :as request}]
   (standard-edn-response
-    (data/get-patron-data (:patron-id path-params))))
+   (data/get-patron-data (:patron-id path-params))))
 
 (defn api-claim-list [_request]
   (standard-edn-response
-    (data/get-claims)))
+   (data/get-claims)))
 
 (defn api-claim-handler
   [{:keys [path-params] :as request}]
   (standard-edn-response
-    (data/get-claim-data (:claim-id path-params))))
+   (data/get-claim-data (:claim-id path-params))))
 
 (defn api-offer-list [_request]
- (standard-edn-response
+  (standard-edn-response
    (data/get-offers)))
 
-(defn api-offer-handler 
+(defn api-offer-handler
   [{:keys [path-params] :as request}]
   (standard-edn-response
-    (data/get-offer-data (:offer-id path-params))))
+   (data/get-offer-data (:offer-id path-params))))
 
-(defn api-make-claim-handler 
+(defn api-make-claim-handler
   [{:keys [path-params query-params] :as request}]
-  (data/make-claim (:offer-id path-params) (get query-params "hero-id") (get query-params "reward"))
-  (standard-edn-response (str request)))
+  (data/make-claim (:offer-id path-params) (get query-params "hero-id") (get query-params "reward")))
 
 (defn routes []
   [["/" {:get {:handler index-handler}}]
@@ -119,16 +116,16 @@
      ["" {:get {:handler api-offer-list}}]
      ["/:offer-id"
       ["" {:get {:handler api-offer-handler}
-                :parameters {:path {:offer-id int?}}}]
+           :parameters {:path {:offer-id int?}}}]
       ["/claim" {:get {:handler api-make-claim-handler
                        :parameters {:path {:hero-id int?}
                                     :query {:reward string?
-                                            :hero-id int?}}}}]]]]])  
+                                            :hero-id int?}}}}]]]]])
 (def app
   (reitit-ring/ring-handler
-    (if (env :dev)
-      (reitit-ring/router (routes))
-      (constantly (reitit-ring/router (routes))))
+   (if (env :dev)
+     (reitit-ring/router (routes))
+     (constantly (reitit-ring/router (routes))))
    (reitit-ring/routes
     (reitit-ring/create-resource-handler {:path "/" :root "/public"})
     (reitit-ring/create-default-handler))
