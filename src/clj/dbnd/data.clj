@@ -21,7 +21,7 @@
    :hero-level (:Heroes/Total_Lvl res)
    :hero-class (:Heroes/Class res)
    :hero-bio (:Heroes/Bio res)
-   :hero-available (:Heroes/availible res)})
+   :hero-available (:Heroes/Availible res)})
 
 (defn get-hero-names []
   (into #{}
@@ -34,8 +34,8 @@
         res (jdbc/execute-one! ds [command])]
     (hero-mappings res)))
 
-(defn set-hero-availibility [hero-id availibility]
-  (jdbc/execute-one! ds [(str "update Heroes set availible = " availibility " where Hero_ID = " hero-id ";")]))
+(defn set-hero-availability [hero-id availability]
+  (jdbc/execute-one! ds [(str "update Heroes set Available = " availability " where Hero_ID = " hero-id ";")]))
 
 ;;----------------
 ;;Patrons

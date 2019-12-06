@@ -87,6 +87,11 @@
   [{:keys [path-params query-params] :as request}]
   (data/make-claim (:offer-id path-params) (get query-params "hero-id") (get query-params "reward")))
 
+(defn api-set-hero-availability 
+  [{:keys [path-params query-params] :as request}]
+  (data/set-hero-availability (:hero-id path-params) (get query-params "availability"))) 
+  
+ 
 (defn routes []
   [["/" {:get {:handler index-handler}}]
    ["/heroes"
@@ -103,7 +108,11 @@
     ["/heroes"
      ["" {:get {:handler api-hero-list}}]
      ["/:hero-id" {:get {:handler api-hero-handler
-                         :parameters {:path {:item-id int?}}}}]]
+                         :parameters {:path {:item-id int?}}}}]
+     ["/:hero-id/set-avail" {:get {:handler api-set-hero-availability
+                                   :parameters {:path {:hero-id int?}
+                                                :query {:availability boolean?}}}}]]
+      
     ["/patrons"
      ["" {:get {:handler api-patron-list}}]
      ["/:patron-id" {:get {:handler api-patron-handler

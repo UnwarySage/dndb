@@ -56,6 +56,10 @@
   (http/get (str api-path "offers/" offer-id "/claim")
             {:query-params {:reward reward
                             :hero-id hero-id}}))
+
+(defn set-hero-availability [hero-id new-availibility]
+  (http/get (str api-path "heroes/" hero-id "/set-avail")
+            {:query-params {:availability new-availibility}}))
 ;; -------------------------
 ;; Page components
 
@@ -118,14 +122,31 @@
 (defn hero-page []
   (let [routing-data (session/get :route)
         hero (get-in routing-data [:route-params :hero-id])
-        hero-data (atom-from-api (str "heroes/" hero))]
+        hero-data (atom-from-api (str "heroes/" hero))
+        local-state (atom {})]
     (fn []
-      [:div.container
+      [:div.container 
        [:div.card
         [:div.card-content
          [:span.card-title (:hero-name @hero-data)]
          [:p (str (:hero-race @hero-data) " " (:hero-class @hero-data))]
-         [:p.flow-text (:hero-bio @hero-data)]]]])))
+         [:p.flow-text (:hero-bio @hero-data)]]
+        [:div.card-action
+         [:button.btn-flat 
+          {:on-click (fn [e]
+                      (do 
+                        (swap! local-state update :available not)
+                        (set-hero-availability hero (:available @local-state))))}
+          (if (nil? (:available @local-state))
+              (if (:hero-available @hero-data)
+                  "Available"
+                  "Unavailable")
+              (if (:available @local-state)
+                  "Available"
+                  "Unavailable"))]]]]))) 
+                         
+          
+                               
 
 (defn patrons-page []
   (let [patrons-data (atom-from-api "patrons")]
