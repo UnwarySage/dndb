@@ -74,7 +74,7 @@
 (defn api-claim-handler
   [{:keys [path-params] :as request}]
   (standard-edn-response
-    (data/get-claim-data (:claim-offer-id path-params))))
+    (data/get-claim-data (:claim-id path-params))))
 
 (defn api-offer-list [_request]
  (standard-edn-response
@@ -113,8 +113,8 @@
                            :parameters {:path {:patron-id int?}}}}]]
     ["/claims"
      ["" {:get {:handler api-claim-list}}]
-     ["/:claim-offer-id" {:get {:handler api-claim-handler
-                                :parameters {:path {:claim-offer-id int?}}}}]]
+     ["/:claim-id" {:get {:handler api-claim-handler
+                          :parameters {:path {:claim-id int?}}}}]]
     ["/offers"
      ["" {:get {:handler api-offer-list}}]
      ["/:offer-id"

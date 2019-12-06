@@ -162,22 +162,22 @@
        [:h1 "Claims"]
        [:ul.collection
         (map (fn [claim]
-              [:li.collection-item {:key (:offer-id claim)}
-               [:a {:href (path-for :claim {:claim-id (:claim-offer-id claim)})}
-                (str (:hero-name claim) " "  (:claim-offer-id claim))]])
+              [:li.collection-item {:key (:claim-id claim)}
+               [:a {:href (path-for :claim {:claim-id (:claim-id claim)})}
+                (str (:quest-name claim) " - "(:hero-name claim))]])
             @claims-data)]])))
 
 (defn claim-page []
  (let [routing-data (session/get :route)
-          claim (get-in routing-data [:route-params :claim-offer-id])
+          claim (get-in routing-data [:route-params :claim-id])
           claim-data (atom-from-api (str "claims/" claim))]
      (fn []   
-        [:div.container
+        [:div.container 
          [:div.card
           [:div.card-content
-           [:span.card-title (:patron-name @claim-data)]
+           [:span.card-title (:hero-name @claim-data)]
            [:p (str (:patron-location @claim-data))]
-           [:p.flow-text (:patron-notes @claim-data)]]]])))
+           [:p.flow-text (:claim-payment @claim-data)]]]])))
 
 
 (defn offers-page []

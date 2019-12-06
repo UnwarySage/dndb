@@ -59,10 +59,17 @@
       [(str "select * from Patron where Patron_ID = " patron-id)])))
 ;;-------------
 ;; Offers
-(def get-quest-data (constantly {:quest-name "Dread Tidings"
-                                 :quest-location "Port Azure"
-                                 :quest-rewards "Sevula's Eternal Blade, 450XP"
-                                 :quest-notes "Deliver news of the death of Umulthud to Sevula, and remind him of his promise"}))
+(defn quest-mappings [inp]
+  {:quest-name (:Quests/Name inp)
+   :quest-id (:Quests/Quest_ID inp)
+   :quest-location (:Quests/Location inp)
+   :quest-rewards (:Quests/Reward inp)
+   :quest-notes (:Quests/Notes inp)})
+
+(defn get-quest-data [quest-id]
+  (quest-mappings 
+    (jdbc/execute-one! ds [(str "select * from Quests where Quest_ID = " quest-id ";")]))) 
+  
 (defn offer-mappings [inp]
   {:offer-id (:Offers/Offer_ID inp)
    :offer-quest-id (:Offers/Quest_ID inp)
@@ -93,19 +100,22 @@
   {:claim-offer-id (:Claims/Offer_ID inp)
    :claim-hero-id (:Claims/Hero_ID inp)
    :claim-payment (:Claims/Payment inp)
-   :claim-date (:Claims/Date inp)})
+   :claim-date (:Claims/Date inp)
+   :claim-id (:Claims/Claim_ID inp)})
 
-(defn get-claim-data [claim-offer-id]
+(defn get-claim-data [claim-id]
   (let [claim-result (claim-mappings
                       (jdbc/execute-one!
                         ds
-                        [(str "select * from Claims where Offer_ID = " claim-offer-id)]))
-        hero-data (get-hero-data (:claim-hero-id claim-result))]
-    (merge hero-data claim-result)))
+                        [(str "select * from Claims where Claim_ID = " claim-id ";")]))
+        hero-data (get-hero-data (:claim-hero-id claim-result))
+        offer-data (get-offer-data (:claim-offer-id  claim-result))]
+    (merge offer-data hero-data claim-result)))
+
         
 (defn get-claims []
  (into #{}
-       (map #(get-claim-data (:Claims/Offer_ID %)))
-     (jdbc/execute! ds ["select Offer_ID from Claims"])))
+       (map #(get-claim-data (:Claims/Claim_ID %)))
+     (jdbc/execute! ds ["select Claim_ID from Claims"])))
 
      
